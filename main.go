@@ -54,12 +54,24 @@ func loadExpenses() ([]expense, error) {
 
 	data, err := os.ReadFile(DATA_FILE_PATH)
 	if err != nil {
-		log.Printf("! Data directory does not exist.\n%v", err)
-		log.Printf("Creating data directory...\n")
+		return nil, err
+	}
 
-		mkDirErr := os.Mkdir(dataDir, 0700)
-		if mkDirErr != nil {
-			log.Fatal("! Could not create data directory. Exiting...\n")
+	dataReader := csv.NewReader(bytes.NewReader(data))
+	dataReader.FieldsPerRecord = 4
+
+	for {
+		record, err := dataReader.Read()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return nil, err
+		}
+
+		expense, err := parseCsvRecord(record)
+		if err != nil {
+			return nil, err
 		}
 
 		err = nil
