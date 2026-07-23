@@ -150,4 +150,22 @@ func formatExpenseForSaving(expense expense) [4]string {
 	return values
 }
 
+func overwriteExpenses(expenses [][4]string) error {
+	dataFile, err := os.OpenFile(DATA_FILE_PATH, os.O_WRONLY|os.O_CREATE, 0644)
+	if err != nil {
+		return err
+	}
+	defer dataFile.Close()
+
+	var expenseSlices [][]string
+	for e := range slices.Values(expenses) {
+		expenseSlices = append(expenseSlices, e[:])
+	}
+
+	dataWriter := csv.NewWriter(dataFile)
+	if err = dataWriter.WriteAll(expenseSlices); err != nil {
+		return err
+	}
+
+	return nil
 }
