@@ -27,8 +27,32 @@ type expense struct {
 }
 
 func main() {
-	dataDir := os.Getenv("HOME")+"/.local/share/z-money"
-	_, err := os.ReadDir(dataDir)
+	t := time.Now()
+	fmt.Printf("date: %s\n", t.Format("2006-01-02"))
+}
+
+func createExpense(description string, amount float64) (expense, error) {
+	if amount <= 0 {
+		return expense{}, errors.New("amount must be a positive number")
+	}
+
+	savedExpenses, err := loadExpenses()
+	if err != nil {
+		return expense{}, err
+	}
+
+	return expense{
+		ID:          getNextId(savedExpenses),
+		Date:        time.Now(),
+		Description: description,
+		Amount:      amount,
+	}, nil
+}
+
+func loadExpenses() ([]expense, error) {
+	var expenses []expense
+
+	data, err := os.ReadFile(DATA_FILE_PATH)
 	if err != nil {
 		log.Printf("! Data directory does not exist.\n%v", err)
 		log.Printf("Creating data directory...\n")
