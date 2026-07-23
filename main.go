@@ -73,17 +73,43 @@ func loadExpenses() ([]expense, error) {
 		if err != nil {
 			return nil, err
 		}
+		expenses = append(expenses, expense)
+	}
+	return expenses, nil
+}
 
-		err = nil
-		log.Printf("Data directory created successfully.")
+func parseCsvRecord(record []string) (expense, error) {
+	if len(record) != 4 {
+		return expense{}, recordParsingError
 	}
 
-	dataFile, err := os.OpenFile(dataDir+"/data", os.O_RDWR|os.O_CREATE, 0644)
+	var (
+		rawId       = record[0]
+		rawDate     = record[1]
+		description = record[2]
+		rawAmount   = record[3]
+	)
+
+	id, err := strconv.Atoi(rawId)
 	if err != nil {
-		log.Fatal("! Could not access data file. Exiting...\nError:\n%w", err)
+		return expense{}, recordParsingError
 	}
-	data := make([]byte, 100)
-	dataFile.Read(data)
+	date, err := time.Parse(DATE_FORMAT, rawDate)
+	if err != nil {
+		return expense{}, recordParsingError
+	}
+	amount, err := strconv.ParseFloat(rawAmount, 64)
+	if err != nil {
+		return expense{}, recordParsingError
+	}
+
+	return expense{
+		ID:          id,
+		Description: description,
+		Date:        date,
+		Amount:      amount,
+	}, nil
+}
 
 	fmt.Printf("data:\n%s", string(data))
 
