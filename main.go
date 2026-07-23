@@ -169,3 +169,14 @@ func overwriteExpenses(expenses [][4]string) error {
 
 	return nil
 }
+
+func updateExpense(expenses []expense, index int, description string, amount float64) []expense {
+	if description != "" {
+		expenses[index].Description = description
+	}
+	if amount != 0 {
+		expenses[index].Amount = amount
+	}
+
+	return expenses
+}
