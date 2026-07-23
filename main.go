@@ -111,6 +111,43 @@ func parseCsvRecord(record []string) (expense, error) {
 	}, nil
 }
 
-	fmt.Printf("data:\n%s", string(data))
+func getNextId(expenses []expense) int {
+	if len(expenses) == 0 {
+		return 1
+	}
+	lastExpense := slices.MaxFunc(expenses, func(a, b expense) int {
+		return cmp.Compare(a.ID, b.ID)
+	})
+
+	return lastExpense.ID + 1
+}
+
+func saveNewExpense(expense [4]string) error {
+	dataFile, err := os.OpenFile(DATA_FILE_PATH, os.O_APPEND|os.O_CREATE, 0644)
+	if err != nil {
+		return err
+	}
+	defer dataFile.Close()
+
+	dataWriter := csv.NewWriter(dataFile)
+	if err = dataWriter.Write(expense[:]); err != nil {
+		return err
+	}
+	dataWriter.Flush()
+	if err = dataWriter.Error(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func formatExpenseForSaving(expense expense) [4]string {
+	var values [4]string
+	values[0] = strconv.Itoa(expense.ID)
+	values[1] = expense.Date.Format(DATE_FORMAT)
+	values[2] = expense.Description
+	values[3] = strconv.FormatFloat(expense.Amount, 'f', 2, 64)
+	return values
+}
 
 }
