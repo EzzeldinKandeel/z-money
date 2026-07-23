@@ -155,6 +155,30 @@ func (r *expensesRepository) find(id int) (int, error) {
 	return index, nil
 }
 
+func (r *expensesRepository) getTotal() float64 {
+	total := 0.0
+	for e := range slices.Values(r.expenses) {
+		total += e.Amount
+	}
+
+	return total
+}
+
+func (r *expensesRepository) getTotalForMonth(month time.Month) (float64, error) {
+	if month < 1 || month > 12 {
+		return 0, errors.New("month must be between 1 and 12")
+	}
+
+	total := 0.0
+	for e := range slices.Values(r.expenses) {
+		if e.Date.Month() == month {
+			total += e.Amount
+		}
+	}
+
+	return total, nil
+}
+
 func parseCsvRecord(record []string) (expense, error) {
 	if len(record) != 4 {
 		return expense{}, recordParsingError
