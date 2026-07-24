@@ -15,6 +15,15 @@ type expensesRepository struct {
 	expenses []expense
 }
 
+func newRepository() (expensesRepository, error) {
+	repo := expensesRepository{}
+	if err := repo.load(); err != nil {
+		return expensesRepository{}, err
+	}
+
+	return repo, nil
+}
+
 func (r *expensesRepository) load() error {
 	var expenses []expense
 
