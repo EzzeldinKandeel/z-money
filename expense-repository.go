@@ -79,8 +79,8 @@ func (r *expensesRepository) save() error {
 	return nil
 }
 
-func (r *expensesRepository) add(expense expense) {
-	r.expenses = append(r.expenses, expense)
+func (r *expensesRepository) add(record expense) {
+	r.expenses = append(r.expenses, record)
 }
 
 func (r *expensesRepository) remove(index int) error {

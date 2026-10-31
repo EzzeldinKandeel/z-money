@@ -17,10 +17,10 @@ var indexOutOfBoundsError = errors.New("thid index does not exist in records arr
 var recordDoesNotExist = errors.New("this record does not exist")
 var invalidUsage = errors.New("unsupported command or flag")
 
-type repository interface {
+type repository[T any] interface {
 	load() error
 	save() error
-	add(record any)
+	add(record T)
 	remove(index int) error
 	update(index int, description string, amount float64) error
 	find(id int) (int, error)
