@@ -3,7 +3,6 @@ package main
 import (
 	"errors"
 	"fmt"
-	"log"
 	"os"
 )
 
@@ -30,9 +29,31 @@ type repository interface {
 
 func main() {
 	if err := os.MkdirAll(DATA_FILE_DIR, 0700); err != nil {
-		log.Fatal(err)
+		fmt.Fprintln(os.Stderr, fmt.Errorf("main: %w", err))
+		os.Exit(1)
 	}
-	arg := os.Args
-	fmt.Println("arguments: ")
-	fmt.Println(arg)
+
+	file, err := os.OpenFile(DATA_FILE_PATH, os.O_CREATE, 0700)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, fmt.Errorf("main: %w", err))
+		os.Exit(1)
+	}
+	file.Close()
+
+	args := os.Args
+	if len(args) < 2 {
+		fmt.Fprintln(
+			os.Stderr,
+			fmt.Errorf(
+				"%w\navilable commands: %v",
+				fmt.Errorf("main: %w", invalidUsage),
+				commands,
+			),
+		)
+		os.Exit(1)
+	}
+	if err := handleCommand(args); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
 }
