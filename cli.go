@@ -132,6 +132,6 @@ func handleCommand(args []string) error {
 	case commands[COMMAND_EDIT]:
 		return handleEdit(subArgs)
 	default:
-		return fmt.Errorf("%w: %s", invalidUsage, command)
+		return fmt.Errorf("handleCommand: %w: %s", invalidUsage, command)
 	}
 }
