@@ -5,6 +5,7 @@ import (
 	"cmp"
 	"encoding/csv"
 	"errors"
+	"fmt"
 	"io"
 	"os"
 	"slices"
@@ -18,7 +19,7 @@ type expensesRepository struct {
 func newRepository() (expensesRepository, error) {
 	repo := expensesRepository{}
 	if err := repo.load(); err != nil {
-		return expensesRepository{}, err
+		return expensesRepository{}, fmt.Errorf("newRepository: %w", err)
 	}
 
 	return repo, nil
@@ -28,8 +29,11 @@ func (r *expensesRepository) load() error {
 	var expenses []expense
 
 	data, err := os.ReadFile(DATA_FILE_PATH)
+	if errors.Is(err, os.ErrNotExist) {
+		return fmt.Errorf("expensesRespository.load: IT DOESNOT EXIST %w", err)
+	}
 	if err != nil {
-		return err
+		return fmt.Errorf("expensesRespository.load: %w", err)
 	}
 
 	dataReader := csv.NewReader(bytes.NewReader(data))
@@ -41,12 +45,12 @@ func (r *expensesRepository) load() error {
 			break
 		}
 		if err != nil {
-			return err
+			return fmt.Errorf("expensesRespository.load: %w", err)
 		}
 
 		expense, err := parseCsvRecord(record)
 		if err != nil {
-			return err
+			return fmt.Errorf("expensesRespository.load: %w", err)
 		}
 		expenses = append(expenses, expense)
 	}
@@ -73,7 +77,7 @@ func (r *expensesRepository) save() error {
 	}
 
 	if err := overwriteExpenses(formatedExpenses); err != nil {
-		return err
+		return fmt.Errorf("expensesRespository.save: %w", err)
 	}
 
 	return nil
@@ -85,7 +89,7 @@ func (r *expensesRepository) add(record expense) {
 
 func (r *expensesRepository) remove(index int) error {
 	if index >= len(r.expenses) {
-		return indexOutOfBoundsError
+		return fmt.Errorf("expensesRepository.remove: %w", indexOutOfBoundsError)
 	}
 
 	r.expenses = slices.Delete(r.expenses, index, index+1)
@@ -97,7 +101,7 @@ func (r *expensesRepository) update(index int, description string, amount float6
 		r.expenses[index].Description = description
 	}
 	if amount < 0 {
-		return recordParsingError
+		return fmt.Errorf("expensesRepository.update: %w", recordParsingError)
 	}
 	if amount != 0 {
 		r.expenses[index].Amount = amount
@@ -111,7 +115,7 @@ func (r *expensesRepository) find(id int) (int, error) {
 		return expense.ID == id
 	})
 	if index == -1 {
-		return -1, recordDoesNotExist
+		return -1, fmt.Errorf("expensesRepository.find: %w", recordDoesNotExist)
 	}
 	return index, nil
 }
@@ -127,7 +131,7 @@ func (r *expensesRepository) getTotal() float64 {
 
 func (r *expensesRepository) getTotalForMonth(month time.Month) (float64, error) {
 	if month < 1 || month > 12 {
-		return 0, errors.New("month must be between 1 and 12")
+		return 0, fmt.Errorf("expensesRepository.getTotalForMonth: month must be between 1 and 12")
 	}
 
 	total := 0.0
