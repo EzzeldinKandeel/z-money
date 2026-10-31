@@ -12,7 +12,7 @@ type expense struct {
 	Amount      float64
 }
 
-func newExpense(repo repository, description string, amount float64) (expense, error) {
+func newExpense(repo repository[expense], description string, amount float64) (expense, error) {
 	if amount <= 0 {
 		return expense{}, recordParsingError
 	}
