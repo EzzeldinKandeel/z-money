@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/csv"
+	"fmt"
 	"os"
 	"slices"
 	"strconv"
@@ -44,7 +45,7 @@ func parseCsvRecord(record []string) (expense, error) {
 func overwriteExpenses(expenses [][4]string) error {
 	dataFile, err := os.OpenFile(DATA_FILE_PATH, os.O_WRONLY|os.O_CREATE, 0644)
 	if err != nil {
-		return err
+		return fmt.Errorf("overwriteExpenses: %w", err)
 	}
 	defer dataFile.Close()
 
@@ -53,9 +54,13 @@ func overwriteExpenses(expenses [][4]string) error {
 		expenseSlices = append(expenseSlices, e[:])
 	}
 
+	err = dataFile.Truncate(0)
+	if err != nil {
+		return fmt.Errorf("overwriteExpenses: %w", err)
+	}
 	dataWriter := csv.NewWriter(dataFile)
 	if err = dataWriter.WriteAll(expenseSlices); err != nil {
-		return err
+		return fmt.Errorf("overwriteExpenses: %w", err)
 	}
 
 	return nil
