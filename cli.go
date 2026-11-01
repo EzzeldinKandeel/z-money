@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"os"
@@ -109,6 +110,30 @@ func handleSummary(args []string) error {
 }
 
 func handleDelete(args []string) error {
+	fs := flag.NewFlagSet("delete", flag.ExitOnError)
+	id := fs.Int("id", 0, "id of entry you want to delete - greater than 0")
+	if err := fs.Parse(args); err != nil {
+		return fmt.Errorf("handleDelete: %w\n", invalidUsage)
+	}
+
+	if *id < 1 {
+		fs.PrintDefaults()
+		return nil
+	}
+
+	repo, err := newRepository()
+	if err != nil {
+		return fmt.Errorf("handleDelete: %w", err)
+	}
+	index, err := repo.find(*id)
+	if errors.Is(err, recordDoesNotExist) {
+		fmt.Fprintf(os.Stderr, recordDoesNotExist.Error())
+		os.Exit(1)
+	}
+	repo.remove(index)
+	repo.save()
+
+	fmt.Println("Expense deleted successfully")
 	return nil
 }
 
