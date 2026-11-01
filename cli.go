@@ -94,7 +94,7 @@ func handleSummary(args []string) error {
 	if month != 0 {
 		fmt.Printf(" for %s", month.String())
 		for _, expense := range repo.expenses {
-			if expense.Date.Month() != month {
+			if expense.Date.Month() != month || expense.Date.Year() != time.Now().Year() {
 				continue
 			}
 			total += expense.Amount
@@ -127,7 +127,7 @@ func handleDelete(args []string) error {
 	}
 	index, err := repo.find(*id)
 	if errors.Is(err, recordDoesNotExist) {
-		fmt.Fprintf(os.Stderr, recordDoesNotExist.Error())
+		fmt.Fprintf(os.Stderr, "%s", recordDoesNotExist.Error())
 		os.Exit(1)
 	}
 	repo.remove(index)
