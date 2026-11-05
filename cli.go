@@ -111,7 +111,7 @@ func handleSummary(args []string) error {
 
 func handleDelete(args []string) error {
 	fs := flag.NewFlagSet("delete", flag.ExitOnError)
-	id := fs.Int("id", 0, "id of entry you want to delete - greater than 0")
+	id := fs.Int("id", 0, "id of expense you want to delete")
 	if err := fs.Parse(args); err != nil {
 		return fmt.Errorf("handleDelete: %w\n", invalidUsage)
 	}
@@ -130,14 +130,53 @@ func handleDelete(args []string) error {
 		fmt.Fprintf(os.Stderr, "%s", recordDoesNotExist.Error())
 		os.Exit(1)
 	}
-	repo.remove(index)
-	repo.save()
+	if err != nil {
+		return fmt.Errorf("handleDelete: %w", err)
+	}
+	if err = repo.remove(index); err != nil {
+		return fmt.Errorf("handleDelete: %w", err)
+	}
+	if err = repo.save(); err != nil {
+		return fmt.Errorf("handleDelete: %w", err)
+	}
 
 	fmt.Println("Expense deleted successfully")
 	return nil
 }
 
 func handleEdit(args []string) error {
+	fs := flag.NewFlagSet("edit", flag.ExitOnError)
+	id := fs.Int("id", 0, "id of the expense you want to edit")
+	description := fs.String("description", "", "what did you pay for? - optional")
+	amount := fs.Float64("amount", 0, "how much did you pay? - optional")
+
+	if err := fs.Parse(args); err != nil {
+		return fmt.Errorf("handleEdit: %w", err)
+	}
+	if *id < 1 {
+		fs.PrintDefaults()
+		return nil
+	}
+
+	repo, err := newRepository()
+	if err != nil {
+		return fmt.Errorf("handleEdit: %w", err)
+	}
+	index, err := repo.find(*id)
+	if errors.Is(err, recordDoesNotExist) {
+		fmt.Fprintf(os.Stderr, "%s", recordDoesNotExist.Error())
+		os.Exit(1)
+	}
+	if err != nil {
+		return fmt.Errorf("handleEdit: %w", err)
+	}
+	if err = repo.update(index, *description, *amount); err != nil {
+		return fmt.Errorf("handleEdit: %w", err)
+	}
+	if err = repo.save(); err != nil {
+		return fmt.Errorf("handleEdit: %w", err)
+	}
+
 	return nil
 }
 
