@@ -43,7 +43,9 @@ func handleAdd(args []string) error {
 		return fmt.Errorf("handleAdd: %w", err)
 	}
 	repo.add(expense)
-	repo.save()
+	if err = repo.save(); err != nil {
+		return fmt.Errorf("handleAdd: %w", err)
+	}
 
 	fmt.Printf("Expense added successfully (ID: %d)\n", expense.ID)
 	return nil
