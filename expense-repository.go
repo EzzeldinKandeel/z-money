@@ -136,7 +136,7 @@ func (r *expensesRepository) getTotalForMonth(month time.Month) (float64, error)
 
 	total := 0.0
 	for e := range slices.Values(r.expenses) {
-		if e.Date.Month() == month {
+		if e.Date.Month() == month && e.Date.Year() == time.Now().Year() {
 			total += e.Amount
 		}
 	}

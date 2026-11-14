@@ -95,16 +95,9 @@ func handleSummary(args []string) error {
 
 	if month != 0 {
 		fmt.Printf(" for %s", month.String())
-		for _, expense := range repo.expenses {
-			if expense.Date.Month() != month || expense.Date.Year() != time.Now().Year() {
-				continue
-			}
-			total += expense.Amount
-		}
+		total, _ = repo.getTotalForMonth(month)
 	} else {
-		for _, expense := range repo.expenses {
-			total += expense.Amount
-		}
+		total = repo.getTotal()
 	}
 
 	fmt.Printf(": %.2f\n", total)
